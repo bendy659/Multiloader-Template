@@ -1,0 +1,10 @@
+{
+    "name": "Template-Mod",
+    "id": "template_mod",
+    "version": "0.1.0",
+    "description": "Ths template for u mods!",
+    "authors": [ "_BENDY659_" ],
+
+    "group": "ru.benos.template_mod",
+    "versions": {}
+}
