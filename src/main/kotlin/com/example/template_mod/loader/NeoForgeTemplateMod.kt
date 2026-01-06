@@ -1,19 +1,20 @@
-//? if forge {
-/*package com.example.template_mod.loader
+//? if neoforge {
+package com.example.template_mod.loader
 
 import com.example.template_mod.ITemplateMod
 import com.example.template_mod.client.TemplateModClient
 import com.example.template_mod.common.TemplateMod
 import com.example.template_mod.server.TemplateModServer
-import net.minecraftforge.fml.ModList
-import net.minecraftforge.fml.common.Mod
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
-import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent
-import thedarkcolour.kotlinforforge.forge.MOD_BUS
+import net.neoforged.fml.ModList
+import net.neoforged.fml.common.Mod
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
+import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent
+import net.neoforged.fml.loading.FMLEnvironment
+import thedarkcolour.kotlinforforge.neoforge.forge.MOD_BUS
 
 @Mod(ITemplateMod.MODID)
-class ForgeTemplateMod {
+class NeoForgeTemplateMod {
     init {
         // For client side //
         if (FMLEnvironment.dist.isClient)
@@ -54,4 +55,4 @@ class ForgeTemplateMod {
         TemplateModServer.launch(forgeServerPlatform)
     }
 }
-*///?}
+//? }

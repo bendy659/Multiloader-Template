@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "${mod_group}.${mod_id}.${mod_mixins}",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "${mod_id}-refmap.json",
+  "client": [ ],
+  "common": [ ],
+  "injectors": { "defaultRequire": 1 }
+}

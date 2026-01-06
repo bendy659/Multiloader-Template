@@ -4,7 +4,33 @@
     "version": "0.1.0",
     "description": "Ths template for u mods!",
     "authors": [ "_BENDY659_" ],
+    "license": "LGPLv3",
 
-    "group": "ru.benos.template_mod",
-    "versions": {}
+    "versions": {
+        "fabric": ["1.21.1"],
+        "neoforge": ["1.21.1"],
+        "forge": ["1.21.1"]
+    },
+
+    "side": { "client": true, "common": true },
+
+    "fabric_entrypoints": { "client": "loader.FabricClientTemplateMod", "common": "loader.FabricTemplateMod" },
+
+    "mixins": "mixins",
+
+    "mappings": ["official_mojang_mappings", "parchment_mc"],
+    "group": "com.example",
+
+    "repositories": [
+        { "url": "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/", "include": "software.bernie.geckolib" }
+    ],
+
+    "depends": [
+        { "notation": "software.bernie.geckolib:geckolib-fabric-{mc}:{version}", "side": "fabric" }
+    ],
+
+    "running_configuration": { },
+
+    "kotlin": "2.0.21",
+    "kotlin_for_forge": "5.6.0"
 }
