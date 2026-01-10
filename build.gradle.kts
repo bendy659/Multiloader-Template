@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalStdlibApi::class)
+
 import DependsManager.registrationDependencies
 import DependsManager.registrationFabric
 import DependsManager.registrationForge
@@ -17,10 +19,11 @@ plugins {
     kotlin("plugin.serialization") version modProperties.kotlinVersion
 }
 
-val subProject = project.name
-val mcVersion = subProject.substringBefore('-')
-val cLoader = subProject.substringAfter('-')
-val props = modProperties
+val subProject: String        = project.name
+val mcVersion:  String        = subProject.substringBefore('-')
+val cLoader:    String        = subProject.substringAfter('-')
+val loader:     Loader        = cLoader.getLoader
+val props:      ModProperties = modProperties
 
 group = props.group
 version = props.version
@@ -38,13 +41,17 @@ configurations.all { resolutionStrategy { force("org.jetbrains.kotlin:kotlin-met
 
 architectury {
     minecraft = mcVersion
-    when(cLoader) { Loader.FABRIC.str -> fabric(); Loader.NEO_FORGE.str -> neoForge(); Loader.FORGE.str -> forge() }
+    when(loader) {
+        Loader.FABRIC -> fabric()
+        Loader.NEO_FORGE -> neoForge()
+        Loader.FORGE -> forge()
+    }
 }
 
-base { archivesName.set("${props.name}-$cLoader") }
+base { archivesName = "${props.name}-${loader.str}" }
 /*
 configurations.all {
-    if (cLoader == "forge" || cLoader == "neoforge") {
+    if (loader.str == "forge" || loader.str == "neoforge") {
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk7")
@@ -66,12 +73,12 @@ dependencies {
     DependsManager.cleanup()
     registrationMappings(props)
 
-    registrationFabric(cLoader)
-    registrationNeoforge(cLoader)
-    registrationForge(cLoader)
+    registrationFabric(loader.str)
+    registrationNeoforge(loader.str)
+    registrationForge(loader.str)
 
     registrationDependencies(props)
-    setupDependencies(loom, mcVersion, cLoader)
+    setupDependencies(loom, mcVersion, loader.str)
 }
 
 loom {
@@ -83,8 +90,11 @@ loom {
 
     decompilers { getByName("vineflower") { options.put("mark-corresponding-synthetics", "1") } }
 
-    if (cLoader == "neoforge") neoForge {  }
-    if (cLoader == "forge") forge { mixinConfigs("${props.id}-forge.mixins.json") }
+    when (loader) {
+        Loader.NEO_FORGE -> neoForge { }
+        Loader.FORGE -> forge { mixinConfigs("${props.id}-forge.mixins.json") }
+        else -> { }
+    }
 
     runConfigs.all {
         props.runningConfiguration.forEach { (env, args) ->
@@ -93,7 +103,7 @@ loom {
             }
         }
 
-        runDir("../../run/$mcVersion")
+        runDir("../../run")
     }
 }
 
@@ -116,17 +126,16 @@ tasks.withType<KotlinJvmCompile>().configureEach {
 val shadowBundle: Configuration by configurations.creating { isCanBeConsumed = false; isCanBeResolved = true }
 
 tasks.shadowJar {
-    configurations = listOf(shadowBundle)
     archiveClassifier = "dev-shadow"
-    // Исключаем лишние мета-файлы из зависимостей
+    configurations = listOf(shadowBundle)
+    from(sourceSets.main.get().output)
     exclude("META-INF/maven/**", "META-INF/gradle/**")
 }
 
 tasks.remapJar {
     injectAccessWidener = true
-    inputFile = tasks.shadowJar.get().archiveFile
+    inputFile = tasks.shadowJar.flatMap { it.archiveFile }
     archiveClassifier = null
-    dependsOn(tasks.shadowJar)
 }
 
 tasks.jar { archiveClassifier = "dev" }
@@ -134,8 +143,11 @@ tasks.jar { archiveClassifier = "dev" }
 // Сборка и копирование в общую папку
 val buildAndCollect = tasks.register<Copy>("buildAndCollect") {
     group = "versioned"
-    from(tasks.remapJar.get().archiveFile, tasks.remapSourcesJar.get().archiveFile)
-    into(rootProject.layout.buildDirectory.dir("libs/${props.version}/$cLoader"))
+    from(
+        tasks.remapJar.flatMap { it.archiveFile },
+        tasks.remapSourcesJar.flatMap { it.archiveFile }
+    )
+    into(rootProject.layout.buildDirectory.dir("libs/${loader.str}"))
     dependsOn(tasks.build)
 }
 
@@ -152,6 +164,19 @@ if (stonecutter.current.isActive) {
 }
 
 tasks.processResources {
+    val excludePattern = mutableListOf<String>()
+
+    if (loader != Loader.FABRIC) { excludePattern += "fabric.mod.json"; excludePattern += "*.accesswidener" }
+    if (loader != Loader.FORGE) excludePattern += "META-INF/mods.toml"
+    if (loader != Loader.NEO_FORGE) excludePattern += "META-INF/neoforge.mods.toml"
+
+    Loader.values().forEach {
+        val lName = it.str
+        if (lName != loader.str) excludePattern += "${props.id}-$lName.mixins.json"
+    }
+
+    exclude(excludePattern)
+
     val files = listOf(
         "pack.mcmeta",
         "fabric.mod.json", "META-INF/*.toml",
@@ -165,7 +190,7 @@ tasks.processResources {
         "mod_version" to props.version,
         "mod_license" to props.license,
         "mc_version" to mcVersion,
-        "loader" to cLoader,
+        "loader" to loader.str,
         "mod_author" to props.authors.joinToString(", "),
         "resourcepack_format" to resourcepackFormat(mcVersion),
         "mod_group" to props.group,
@@ -176,14 +201,5 @@ tasks.processResources {
     )
 
     inputs.properties(tokens)
-
-    // Используем expand для поддержки ${mod_id}
-    filesMatching(files) {
-        expand(tokens)
-    }
-}
-
-// Финальное имя файла
-tasks.withType<AbstractArchiveTask>().configureEach {
-    archiveFileName.set("${props.name}-$cLoader-$mcVersion-${props.version}.jar")
+    filesMatching(files) { expand(tokens) }
 }

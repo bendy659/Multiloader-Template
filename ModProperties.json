@@ -14,7 +14,7 @@
 
     "side": { "client": true, "common": true },
 
-    "fabric_entrypoints": { "client": "loader.FabricClientTemplateMod", "common": "loader.FabricTemplateMod" },
+    "fabric_entrypoints": { "client": "loader.FabricClientTemplateMod", "common": "loader.FabricTemplateMod", "server": "loader.FabricServerTemplateMod" },
 
     "mixins": "mixins",
 

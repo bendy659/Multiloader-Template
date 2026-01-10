@@ -1,5 +1,5 @@
 //? if neoforge {
-package com.example.template_mod.loader
+/*package com.example.template_mod.loader
 
 import com.example.template_mod.ITemplateMod
 import com.example.template_mod.client.TemplateModClient
@@ -55,4 +55,4 @@ class NeoForgeTemplateMod {
         TemplateModServer.launch(forgeServerPlatform)
     }
 }
-//? }
+*///?}

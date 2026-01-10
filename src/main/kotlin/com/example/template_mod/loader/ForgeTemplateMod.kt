@@ -1,5 +1,5 @@
 //? if forge {
-/*package com.example.template_mod.loader
+package com.example.template_mod.loader
 
 import com.example.template_mod.ITemplateMod
 import com.example.template_mod.client.TemplateModClient
@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent
+import net.minecraftforge.fml.loading.FMLEnvironment
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 
 @Mod(ITemplateMod.MODID)
@@ -54,4 +55,4 @@ class ForgeTemplateMod {
         TemplateModServer.launch(forgeServerPlatform)
     }
 }
-*///?}
+//?}
